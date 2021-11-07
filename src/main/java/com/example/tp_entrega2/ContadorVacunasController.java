@@ -19,15 +19,19 @@ public class ContadorVacunasController
     @FXML
     Button btnElegirArchivo;
     @FXML
-    TableView tblDatos;
+    TableView<DatoTabla> tblDatos;
     @FXML
-    ComboBox cbxDepartamentos;
+    ComboBox<String> cbxDepartamentos;
     @FXML
     RadioButton rdbSexo;
     @FXML
     RadioButton rdbOrden;
     @FXML
     RadioButton rdbVacuna;
+
+    //Crear tabla hash
+    TSBHashTableDA<String, Contador> tablaHashDepartamentos = new TSBHashTableDA<String, Contador>(101);
+    Contador contadorActual;
 
     @FXML
     void BtnElegirArchivoClick()
@@ -41,18 +45,15 @@ public class ContadorVacunasController
         //Mostrar nombre del archivo
         lblArchivoNombre.setText("Archivo: " + archivo.getName());
 
-        //Crear tabla hash
-        TSBHashTableDA<String, Contador> tablaHashDepartamentos = new TSBHashTableDA<String, Contador>(101);
-
         ///Lectura del archivo
         try
         {
             Scanner lectorArchivo = new Scanner(archivo);
             lectorArchivo.nextLine();   //Se saltea la primera linea que son los titulos de las columnas
-            tablaHashDepartamentos.put("Total", new Contador());
+            tablaHashDepartamentos.put("Todos", new Contador());
             List<String> nombreDepartamentos = new ArrayList<String>();
 
-            for (int i = 0; i < 3000; i++) //TODO Limitado con un for porque el archivo es gigante, dsp pasar a while
+            for (int i = 0; i < 100000; i++) //TODO Limitado con un for porque el archivo es gigante, dsp pasar a while
             {
                 //Tomar una linea del arhivo y crea Scanner para analizarla
                 String datoCrudo = lectorArchivo.nextLine();
@@ -61,13 +62,12 @@ public class ContadorVacunasController
                 if(dato.getJurisdiccionAplicacion().getNombre().equals("Córdoba"))
                 {
                     //Conteo total
-                    relizarConteos(tablaHashDepartamentos, "Total", dato);
+                    relizarConteos(tablaHashDepartamentos, "Todos", dato);
 
                     //Contador de departamento
                     String dptoNombre = dato.getDeptoAplicacion().getNombre();
 
                     //Si no existe el departamento en la tabla lo agrega
-                    System.out.println(!tablaHashDepartamentos.containsKey(dptoNombre) + " - Dpto: " + dptoNombre);
                     if(!tablaHashDepartamentos.containsKey(dptoNombre))
                     {
                         Contador contadorDpto = new Contador();
@@ -82,38 +82,21 @@ public class ContadorVacunasController
                 else {i--;} //Aca le resto a i para que muestre 2000 entradas de Cordoba para comparar si el contador cuenta bien
             }
 
-            //Muestra en consola Despues borrar
             System.out.println("Lectura Terminada!");
-            System.out.println("Conteo: ");
-            System.out.println("Masculinos: " + tablaHashDepartamentos.get("Total").getContMasculino() + " -- Femeninos: " + tablaHashDepartamentos.get("Total").getContFemenino() + " -- Otros: " + tablaHashDepartamentos.get("Total").getContOtro());
-            System.out.println("Primera: " + tablaHashDepartamentos.get("Total").getContPrimera() + " -- Segunda: " + tablaHashDepartamentos.get("Total").getContSegunda() + " -- Extra: " + tablaHashDepartamentos.get("Total").getContExtra());
-            int[] contVacunas = tablaHashDepartamentos.get("Total").getContVacunas();
-            String[] nombresVacunas = tablaHashDepartamentos.get("Total").getNombresVacunas();
-            for (int i = 0; i < nombresVacunas.length; i++) {
-                System.out.print(nombresVacunas[i] + ": " + contVacunas[i] + " -- ");
-            }
 
             //Agrego nombres departamentos a combobox
             cbxDepartamentos.getItems().clear();
             Collections.sort(nombreDepartamentos);
+            nombreDepartamentos.add(0, "Todos");
             cbxDepartamentos.getItems().addAll(nombreDepartamentos);
-
-            /*
-            //Crea tabla
-            TableColumn<Dato, String> colSexo = new TableColumn<>("Sexo");
-            colSexo.setCellValueFactory(new PropertyValueFactory<>("sexo"));
-
-            TableColumn<Dato, String> colGrupoEtario = new TableColumn<>("Grupo Etario");
-            colGrupoEtario.setCellValueFactory(new PropertyValueFactory<>("grupoEtario"));
-
-            tblDatos.getColumns().addAll(colSexo, colGrupoEtario);
-            tblDatos.getItems().addAll(listaDatos);
-            */
         }
         catch (FileNotFoundException exNoEncontrado)
         {
             System.err.println("Error inesperado, archivo no encontrado");
         }
+
+        //Habilita el combobox
+        cbxDepartamentos.setDisable(false);
     }
 
     private void relizarConteos(TSBHashTableDA<String, Contador> tabla, String contadorNombre, Dato dato)
@@ -122,5 +105,121 @@ public class ContadorVacunasController
         cont.contarSexo(dato.getSexo());
         cont.contarOrden("" + dato.getOrdenDosis());
         cont.contarVacuna(dato.getVacuna());
+    }
+
+    @FXML
+    void cbxDepartamentosClick()
+    {
+        //Toma el contador del departamento elegido
+        String dpto = cbxDepartamentos.getValue();
+        contadorActual = tablaHashDepartamentos.get(dpto);
+        //Limpia la tabla
+        tblDatos.getItems().clear();
+        tblDatos.getColumns().clear();
+
+        //Habilitar los radiobuttons
+        rdbSexo.setDisable(false);
+        rdbOrden.setDisable(false);
+        rdbVacuna.setDisable(false);
+        //Resetea los radiobuttons
+        rdbSexo.setSelected(false);
+        rdbOrden.setSelected(false);
+        rdbVacuna.setSelected(false);
+
+        System.out.println("\nConteo: ");
+        System.out.println("Masculinos: " + contadorActual.getContMasculino() + " -- Femeninos: " + contadorActual.getContFemenino() + " -- Otros: " + contadorActual.getContOtro());
+        System.out.println("Primera: " + contadorActual.getContPrimera() + " -- Segunda: " + contadorActual.getContSegunda() + " -- Extra: " + contadorActual.getContExtra());
+        int[] contVacunas = contadorActual.getContVacunas();
+        String[] nombresVacunas = contadorActual.getNombresVacunas();
+        for (int i = 0; i < nombresVacunas.length; i++) {
+            System.out.print(nombresVacunas[i] + ": " + contVacunas[i] + " -- ");
+        }
+    }
+
+    @FXML
+    void rdbSexoClick()
+    {
+        //Limpia la tabla
+        tblDatos.getItems().clear();
+        tblDatos.getColumns().clear();
+
+        //Crea las columnas
+        TableColumn<DatoTabla, String> colDescripcion = new TableColumn<>("Sexo");
+        TableColumn<DatoTabla, Integer> colConteo = new TableColumn<>("Conteo");
+        colDescripcion.setPrefWidth(210);
+        colConteo.setPrefWidth(210);
+        colDescripcion.setCellValueFactory(new PropertyValueFactory<DatoTabla, String>("descripcion"));
+        colConteo.setCellValueFactory(new PropertyValueFactory<DatoTabla,Integer>("cantidad"));
+
+        //Agrega los datos
+        tblDatos.getColumns().addAll(colDescripcion, colConteo);
+        tblDatos.getItems().add(new DatoTabla("Masculino", contadorActual.getContMasculino()));
+        tblDatos.getItems().add(new DatoTabla("Femenino", contadorActual.getContFemenino()));
+
+    }
+    @FXML
+    void rdbOrdenClick()
+    {
+        //Limpia la tabla
+        tblDatos.getItems().clear();
+        tblDatos.getColumns().clear();
+
+        //Crea las columnas
+        TableColumn<DatoTabla, String> colDescripcion = new TableColumn<>("Orden Dosis");
+        TableColumn<DatoTabla, Integer> colConteo = new TableColumn<>("Conteo");
+        colDescripcion.setPrefWidth(210);
+        colConteo.setPrefWidth(210);
+        colDescripcion.setCellValueFactory(new PropertyValueFactory<DatoTabla, String>("descripcion"));
+        colConteo.setCellValueFactory(new PropertyValueFactory<DatoTabla,Integer>("cantidad"));
+
+        //Agrega los datos
+        tblDatos.getColumns().addAll(colDescripcion, colConteo);
+        tblDatos.getItems().add(new DatoTabla("Primera Dosis", contadorActual.getContPrimera()));
+        tblDatos.getItems().add(new DatoTabla("Segunda Dosis", contadorActual.getContSegunda()));
+        tblDatos.getItems().add(new DatoTabla("Dosis Extra", contadorActual.getContExtra()));
+    }
+    @FXML
+    void rdbVacunaClick()
+    {
+        //Limpia la tabla
+        tblDatos.getItems().clear();
+        tblDatos.getColumns().clear();
+
+        //Crea las columnas
+        TableColumn<DatoTabla, String> colDescripcion = new TableColumn<>("Vacuna");
+        TableColumn<DatoTabla, Integer> colConteo = new TableColumn<>("Conteo");
+        colDescripcion.setPrefWidth(210);
+        colConteo.setPrefWidth(210);
+        colDescripcion.setCellValueFactory(new PropertyValueFactory<DatoTabla, String>("descripcion"));
+        colConteo.setCellValueFactory(new PropertyValueFactory<DatoTabla,Integer>("cantidad"));
+
+        //Agrega los datos
+        tblDatos.getColumns().addAll(colDescripcion, colConteo);
+        int[] cantidadesVacunas = contadorActual.getContVacunas();
+        String[] nombresVacunas = contadorActual.getNombresVacunas();
+
+        for (int i = 0; i < cantidadesVacunas.length; i++)
+        {
+            tblDatos.getItems().add(new DatoTabla(nombresVacunas[i], cantidadesVacunas[i]));
+        }
+    }
+
+    public class DatoTabla
+    {
+        String descripcion;
+        int cantidad;
+
+        public DatoTabla(String desc, int cant)
+        {
+            descripcion = desc;
+            cantidad = cant;
+        }
+
+        public int getCantidad() {
+            return cantidad;
+        }
+        public String getDescripcion() {
+            return descripcion;
+        }
     }
 }

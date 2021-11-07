@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class Contador
 {
-    private int contMasculino, contFemenino, contOtro;
+    private int contMasculino, contFemenino, contOtro;  //contOtro creado por las dudas que no sea M o F, no se muestra en la tabla
     private int contPrimera, contSegunda, contExtra;
     private List<Integer> contVacunas;
     private List<String> nombresVacunas;
