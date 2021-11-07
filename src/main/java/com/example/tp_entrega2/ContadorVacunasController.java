@@ -10,9 +10,7 @@ import javafx.stage.FileChooser;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class ContadorVacunasController
 {
@@ -44,18 +42,17 @@ public class ContadorVacunasController
         lblArchivoNombre.setText("Archivo: " + archivo.getName());
 
         //Crear tabla hash
-        TSBHashTableDA<String, Contador> tablaHashDepartamentos = new TSBHashTableDA<String, Contador>();
+        TSBHashTableDA<String, Contador> tablaHashDepartamentos = new TSBHashTableDA<String, Contador>(101);
 
         ///Lectura del archivo
         try
         {
             Scanner lectorArchivo = new Scanner(archivo);
             lectorArchivo.nextLine();   //Se saltea la primera linea que son los titulos de las columnas
-            Contador contadorTotal = new Contador();
-            tablaHashDepartamentos.put("Total", contadorTotal);
+            tablaHashDepartamentos.put("Total", new Contador());
             List<String> nombreDepartamentos = new ArrayList<String>();
 
-            for (int i = 0; i < 2000; i++) //TODO Limitado con un for porque el archivo es gigante, dsp pasar a while
+            for (int i = 0; i < 3000; i++) //TODO Limitado con un for porque el archivo es gigante, dsp pasar a while
             {
                 //Tomar una linea del arhivo y crea Scanner para analizarla
                 String datoCrudo = lectorArchivo.nextLine();
@@ -70,9 +67,11 @@ public class ContadorVacunasController
                     String dptoNombre = dato.getDeptoAplicacion().getNombre();
 
                     //Si no existe el departamento en la tabla lo agrega
+                    System.out.println(!tablaHashDepartamentos.containsKey(dptoNombre) + " - Dpto: " + dptoNombre);
                     if(!tablaHashDepartamentos.containsKey(dptoNombre))
                     {
-                        tablaHashDepartamentos.put(dptoNombre, new Contador());
+                        Contador contadorDpto = new Contador();
+                        tablaHashDepartamentos.put(dptoNombre, contadorDpto);
                         nombreDepartamentos.add(dptoNombre);
                     }
 
@@ -80,7 +79,7 @@ public class ContadorVacunasController
                     relizarConteos(tablaHashDepartamentos, dptoNombre, dato);
 
                 }
-                //else {i--;} //Aca le resto a i para que muestre 2000 entradas de Cordoba para comparar si el contador cuenta bien
+                else {i--;} //Aca le resto a i para que muestre 2000 entradas de Cordoba para comparar si el contador cuenta bien
             }
 
             //Muestra en consola Despues borrar
@@ -95,8 +94,9 @@ public class ContadorVacunasController
             }
 
             //Agrego nombres departamentos a combobox
-            //cbxDepartamentos.getItems().clear();
-            //cbxDepartamentos.getItems().addAll(nombreDepartamentos);
+            cbxDepartamentos.getItems().clear();
+            Collections.sort(nombreDepartamentos);
+            cbxDepartamentos.getItems().addAll(nombreDepartamentos);
 
             /*
             //Crea tabla
