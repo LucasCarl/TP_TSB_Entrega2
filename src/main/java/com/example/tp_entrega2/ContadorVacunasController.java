@@ -48,7 +48,7 @@ public class ContadorVacunasController
             lectorArchivo.nextLine();   //Se saltea la primera linea que son los titulos de las columnas
             Contador contadorTotal = new Contador();
 
-            for (int i = 0; i < 2000; i++) //Limitado con un for porque el archivo es gigante, dsp pasar a while
+            for (int i = 0; i < 2000; i++) //TODO Limitado con un for porque el archivo es gigante, dsp pasar a while
             {
                 //Tomar una linea del arhivo y crea Scanner para analizarla
                 String datoCrudo = lectorArchivo.nextLine();
