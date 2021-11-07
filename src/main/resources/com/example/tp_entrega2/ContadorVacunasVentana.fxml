@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="368.0" prefWidth="467.0" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.tp_entrega2.ContadorVacunasController">
+   <children>
+      <Button fx:id="btnElegirArchivo" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#BtnElegirArchivoClick" prefHeight="25.0" prefWidth="91.0" text="Elegir Archivo" />
+      <Label fx:id="lblArchivoNombre" layoutX="120.0" layoutY="18.0" text="Archivo: " />
+      <TableView fx:id="tblDatos" layoutX="21.0" layoutY="144.0" prefHeight="200.0" prefWidth="431.0" />
+      <ComboBox fx:id="cbxDepartamentos" layoutX="120.0" layoutY="63.0" prefWidth="150.0" />
+      <RadioButton fx:id="rdbSexo" layoutX="28.0" layoutY="111.0" mnemonicParsing="false" text="Conteo por Sexo" />
+      <RadioButton fx:id="rdbOrden" layoutX="147.0" layoutY="111.0" mnemonicParsing="false" text="Conteo por Orden de Dosis" />
+      <RadioButton fx:id="rdbVacuna" layoutX="322.0" layoutY="111.0" mnemonicParsing="false" text="Conteo por Vacuna" />
+      <Label layoutX="29.0" layoutY="67.0" text="Departamento" />
+   </children>
+</Pane>
