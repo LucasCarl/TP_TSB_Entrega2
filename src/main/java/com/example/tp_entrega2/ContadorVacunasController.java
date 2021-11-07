@@ -10,6 +10,8 @@ import javafx.stage.FileChooser;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class ContadorVacunasController
@@ -41,12 +43,17 @@ public class ContadorVacunasController
         //Mostrar nombre del archivo
         lblArchivoNombre.setText("Archivo: " + archivo.getName());
 
+        //Crear tabla hash
+        TSBHashTableDA<String, Contador> tablaHashDepartamentos = new TSBHashTableDA<String, Contador>();
+
         ///Lectura del archivo
         try
         {
             Scanner lectorArchivo = new Scanner(archivo);
             lectorArchivo.nextLine();   //Se saltea la primera linea que son los titulos de las columnas
             Contador contadorTotal = new Contador();
+            tablaHashDepartamentos.put("Total", contadorTotal);
+            List<String> nombreDepartamentos = new ArrayList<String>();
 
             for (int i = 0; i < 2000; i++) //TODO Limitado con un for porque el archivo es gigante, dsp pasar a while
             {
@@ -56,25 +63,40 @@ public class ContadorVacunasController
                 //Analiza el dato y suma al contador total
                 if(dato.getJurisdiccionAplicacion().getNombre().equals("Córdoba"))
                 {
-                    contadorTotal.contarSexo(dato.getSexo());
-                    contadorTotal.contarOrden("" + dato.getOrdenDosis());
-                    contadorTotal.contarVacuna(dato.getVacuna());
-                    System.out.println(dato);   //Borrar
+                    //Conteo total
+                    relizarConteos(tablaHashDepartamentos, "Total", dato);
+
+                    //Contador de departamento
+                    String dptoNombre = dato.getDeptoAplicacion().getNombre();
+
+                    //Si no existe el departamento en la tabla lo agrega
+                    if(!tablaHashDepartamentos.containsKey(dptoNombre))
+                    {
+                        tablaHashDepartamentos.put(dptoNombre, new Contador());
+                        nombreDepartamentos.add(dptoNombre);
+                    }
+
+                    //Conteo Departamento
+                    relizarConteos(tablaHashDepartamentos, dptoNombre, dato);
+
                 }
-                else {i--;} //Aca le resto a i para que muestre 2000 entradas de Cordoba para comparar si el contador cuenta bien
+                //else {i--;} //Aca le resto a i para que muestre 2000 entradas de Cordoba para comparar si el contador cuenta bien
             }
 
             //Muestra en consola Despues borrar
             System.out.println("Lectura Terminada!");
             System.out.println("Conteo: ");
-            System.out.println("Masculinos: " + contadorTotal.getContMasculino() + " -- Femeninos: " + contadorTotal.getContFemenino() + " -- Otros: " + contadorTotal.getContOtro());
-            System.out.println("Primera: " + contadorTotal.getContPrimera() + " -- Segunda: " + contadorTotal.getContSegunda() + " -- Extra: " + contadorTotal.getContExtra());
-            int[] contVacunas = contadorTotal.getContVacunas();
-            String[] nombresVacunas = contadorTotal.getNombresVacunas();
+            System.out.println("Masculinos: " + tablaHashDepartamentos.get("Total").getContMasculino() + " -- Femeninos: " + tablaHashDepartamentos.get("Total").getContFemenino() + " -- Otros: " + tablaHashDepartamentos.get("Total").getContOtro());
+            System.out.println("Primera: " + tablaHashDepartamentos.get("Total").getContPrimera() + " -- Segunda: " + tablaHashDepartamentos.get("Total").getContSegunda() + " -- Extra: " + tablaHashDepartamentos.get("Total").getContExtra());
+            int[] contVacunas = tablaHashDepartamentos.get("Total").getContVacunas();
+            String[] nombresVacunas = tablaHashDepartamentos.get("Total").getNombresVacunas();
             for (int i = 0; i < nombresVacunas.length; i++) {
                 System.out.print(nombresVacunas[i] + ": " + contVacunas[i] + " -- ");
             }
 
+            //Agrego nombres departamentos a combobox
+            //cbxDepartamentos.getItems().clear();
+            //cbxDepartamentos.getItems().addAll(nombreDepartamentos);
 
             /*
             //Crea tabla
@@ -92,5 +114,13 @@ public class ContadorVacunasController
         {
             System.err.println("Error inesperado, archivo no encontrado");
         }
+    }
+
+    private void relizarConteos(TSBHashTableDA<String, Contador> tabla, String contadorNombre, Dato dato)
+    {
+        Contador cont = tabla.get(contadorNombre);
+        cont.contarSexo(dato.getSexo());
+        cont.contarOrden("" + dato.getOrdenDosis());
+        cont.contarVacuna(dato.getVacuna());
     }
 }

@@ -16,4 +16,8 @@ public class Departamento
     {
         return nombre + " (ID: " + id + ")";
     }
+
+    public String getNombre() {
+        return nombre;
+    }
 }
