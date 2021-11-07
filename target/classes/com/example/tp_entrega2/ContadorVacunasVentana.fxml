@@ -19,5 +19,6 @@
       <RadioButton fx:id="rdbOrden" disable="true" layoutX="147.0" layoutY="111.0" mnemonicParsing="false" onAction="#rdbOrdenClick" text="Conteo por Orden de Dosis" toggleGroup="$grupo" />
       <RadioButton fx:id="rdbVacuna" disable="true" layoutX="322.0" layoutY="111.0" mnemonicParsing="false" onAction="#rdbVacunaClick" text="Conteo por Vacuna" toggleGroup="$grupo" />
       <Label layoutX="29.0" layoutY="67.0" text="Departamento" />
+      <Label fx:id="lblProcesando" layoutX="13.0" layoutY="45.0" prefHeight="17.0" prefWidth="91.0" />
    </children>
 </Pane>

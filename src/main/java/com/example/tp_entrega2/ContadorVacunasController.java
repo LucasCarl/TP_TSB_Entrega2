@@ -17,6 +17,8 @@ public class ContadorVacunasController
     @FXML
     Label lblArchivoNombre;
     @FXML
+    Label lblProcesando;
+    @FXML
     Button btnElegirArchivo;
     @FXML
     TableView<DatoTabla> tblDatos;
@@ -36,6 +38,8 @@ public class ContadorVacunasController
     @FXML
     void BtnElegirArchivoClick()
     {
+        //Pone texto procesando para que no parezca que se clavo el programa
+        lblProcesando.setText("Procesando...");
         ///Busqueda del archivo
         FileChooser archChooser = new FileChooser();
         FileChooser.ExtensionFilter filtro = new FileChooser.ExtensionFilter("Archivos de Valores Separados por Comas", "*.csv");
@@ -52,8 +56,9 @@ public class ContadorVacunasController
             lectorArchivo.nextLine();   //Se saltea la primera linea que son los titulos de las columnas
             tablaHashDepartamentos.put("Todos", new Contador());
             List<String> nombreDepartamentos = new ArrayList<String>();
+            int n = 0;
 
-            for (int i = 0; i < 100000; i++) //TODO Limitado con un for porque el archivo es gigante, dsp pasar a while
+            while (lectorArchivo.hasNextLine())
             {
                 //Tomar una linea del arhivo y crea Scanner para analizarla
                 String datoCrudo = lectorArchivo.nextLine();
@@ -77,9 +82,7 @@ public class ContadorVacunasController
 
                     //Conteo Departamento
                     relizarConteos(tablaHashDepartamentos, dptoNombre, dato);
-
                 }
-                else {i--;} //Aca le resto a i para que muestre 2000 entradas de Cordoba para comparar si el contador cuenta bien
             }
 
             System.out.println("Lectura Terminada!");
@@ -97,6 +100,8 @@ public class ContadorVacunasController
 
         //Habilita el combobox
         cbxDepartamentos.setDisable(false);
+        //Borra texto procesando
+        lblProcesando.setText("");
     }
 
     private void relizarConteos(TSBHashTableDA<String, Contador> tabla, String contadorNombre, Dato dato)
