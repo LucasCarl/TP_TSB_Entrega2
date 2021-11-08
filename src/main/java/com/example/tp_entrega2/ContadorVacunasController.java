@@ -82,7 +82,11 @@ public class ContadorVacunasController
 
                     //Conteo Departamento
                     relizarConteos(tablaHashDepartamentos, dptoNombre, dato);
+
                 }
+                //Mostrar progreso de busqueda en consola
+                n++;
+                if(n % 100000 == 0) {System.out.println("Registros recorridos: " + n);}
             }
 
             System.out.println("Lectura Terminada!");
@@ -131,7 +135,8 @@ public class ContadorVacunasController
         rdbOrden.setSelected(false);
         rdbVacuna.setSelected(false);
 
-        System.out.println("\nConteo: ");
+        //Mostrar por consola resultados
+        System.out.println("\n\nConteo: ");
         System.out.println("Masculinos: " + contadorActual.getContMasculino() + " -- Femeninos: " + contadorActual.getContFemenino() + " -- Otros: " + contadorActual.getContOtro());
         System.out.println("Primera: " + contadorActual.getContPrimera() + " -- Segunda: " + contadorActual.getContSegunda() + " -- Extra: " + contadorActual.getContExtra());
         int[] contVacunas = contadorActual.getContVacunas();
@@ -160,7 +165,7 @@ public class ContadorVacunasController
         tblDatos.getColumns().addAll(colDescripcion, colConteo);
         tblDatos.getItems().add(new DatoTabla("Masculino", contadorActual.getContMasculino()));
         tblDatos.getItems().add(new DatoTabla("Femenino", contadorActual.getContFemenino()));
-
+        tblDatos.getItems().add(new DatoTabla("Otro", contadorActual.getContOtro()));
     }
     @FXML
     void rdbOrdenClick()
